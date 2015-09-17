@@ -1,5 +1,6 @@
 $ ->
-  ws = new WebSocket $("body").data("ws-url")
+  wsUrl = 'wss://' + location.host + location.pathname + 'ws';
+  ws = new WebSocket wsUrl
   ws.onmessage = (event) ->
     message = JSON.parse event.data
     switch message.type
@@ -76,7 +77,7 @@ handleFlip = (container) ->
     container.addClass("flipped")
     # fetch stock details and tweet
     $.ajax
-      url: "/sentiment/" + container.children(".flipper").attr("data-content")
+      url: location.href + "/sentiment/" + container.children(".flipper").attr("data-content")
       dataType: "json"
       context: container
       success: (data) ->
