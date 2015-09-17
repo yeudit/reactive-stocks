@@ -67,6 +67,8 @@ updateStockChart = (message) ->
     plot.draw()
 
 handleFlip = (container) ->
+  detailsHolder = container.find(".details-holder")
+  detailsHolder.css('backface-visibility','inherit')
   if (container.hasClass("flipped"))
     container.removeClass("flipped")
     container.find(".details-holder").empty()
