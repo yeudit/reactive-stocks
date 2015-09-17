@@ -86,13 +86,13 @@ handleFlip = (container) ->
         switch data.label
           when "pos"
             detailsHolder.append($("<h4>").text("The tweets say BUY!"))
-            detailsHolder.append($("<img>").attr("src", "/assets/images/buy.png"))
+            detailsHolder.append($("<img>").attr("src", location.herf + "assets/images/buy.png"))
           when "neg"
             detailsHolder.append($("<h4>").text("The tweets say SELL!"))
-            detailsHolder.append($("<img>").attr("src", "/assets/images/sell.png"))
+            detailsHolder.append($("<img>").attr("src", location.herf + "assets/images/sell.png"))
           else
             detailsHolder.append($("<h4>").text("The tweets say HOLD!"))
-            detailsHolder.append($("<img>").attr("src", "/assets/images/hold.png"))
+            detailsHolder.append($("<img>").attr("src", location.herf + "assets/images/hold.png"))
       error: (jqXHR, textStatus, error) ->
         detailsHolder = $(this).find(".details-holder")
         detailsHolder.empty()
