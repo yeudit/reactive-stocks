@@ -6,8 +6,7 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 scalaVersion := "2.11.6"
 
-// PlayKeys.fileWatchService := play.runsupport.FileWatchService.sbt(2000)
-PlayKeys.fileWatchService := play.runsupport.FileWatchService.jnotify(2000)
+PlayKeys.fileWatchService := play.runsupport.FileWatchService.sbt(2000)
 
 // scalaz-bintray resolver needed for specs2 library
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
