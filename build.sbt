@@ -20,5 +20,5 @@ libraryDependencies ++= Seq(
 )
 
 routesGenerator := InjectedRoutesGenerator
-
+PlayKeys.fileWatchService := play.runsupport.FileWatchService.sbt(2000)
 fork in run := true
