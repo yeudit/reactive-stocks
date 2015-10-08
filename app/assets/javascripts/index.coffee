@@ -1,5 +1,6 @@
 $ ->
-  ws = new WebSocket $("body").data("ws-url")
+  wsUrl = 'wss://' + location.host + location.pathname + 'ws';
+  ws = new WebSocket wsUrl
   ws.onmessage = (event) ->
     message = JSON.parse event.data
     switch message.type
@@ -67,6 +68,8 @@ updateStockChart = (message) ->
     plot.draw()
 
 handleFlip = (container) ->
+  detailsHolder = container.find(".details-holder")
+  detailsHolder.css('backface-visibility','inherit')
   if (container.hasClass("flipped"))
     container.removeClass("flipped")
     container.find(".details-holder").empty()
@@ -74,7 +77,7 @@ handleFlip = (container) ->
     container.addClass("flipped")
     # fetch stock details and tweet
     $.ajax
-      url: "/sentiment/" + container.children(".flipper").attr("data-content")
+      url: location.href + "sentiment/" + container.children(".flipper").attr("data-content")
       dataType: "json"
       context: container
       success: (data) ->
@@ -83,18 +86,18 @@ handleFlip = (container) ->
         switch data.label
           when "pos"
             detailsHolder.append($("<h4>").text("The tweets say BUY!"))
-            detailsHolder.append($("<img>").attr("src", "/assets/images/buy.png"))
+            detailsHolder.append($("<img>").attr("src", "assets/images/buy.png"))
           when "neg"
             detailsHolder.append($("<h4>").text("The tweets say SELL!"))
-            detailsHolder.append($("<img>").attr("src", "/assets/images/sell.png"))
+            detailsHolder.append($("<img>").attr("src", "assets/images/sell.png"))
           else
             detailsHolder.append($("<h4>").text("The tweets say HOLD!"))
-            detailsHolder.append($("<img>").attr("src", "/assets/images/hold.png"))
+            detailsHolder.append($("<img>").attr("src", "assets/images/hold.png"))
       error: (jqXHR, textStatus, error) ->
         detailsHolder = $(this).find(".details-holder")
         detailsHolder.empty()
         detailsHolder.append($("<h2>").text("Error: " + JSON.parse(jqXHR.responseText).error))
     # display loading info
     detailsHolder = container.find(".details-holder")
-    detailsHolder.append($("<h4>").text("Determing whether you should buy or sell based on the sentiment of recent tweets..."))
+    detailsHolder.append($("<h4>").text("Determining whether you should buy or sell based on the sentiment of recent tweets..."))
     detailsHolder.append($("<div>").addClass("progress progress-striped active").append($("<div>").addClass("bar").css("width", "100%")))

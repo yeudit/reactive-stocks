@@ -5,14 +5,20 @@
 <html>
 <head>
     <title>Reactive Stock News Dashboard</title>
-    <link rel='stylesheet' href='@routes.Assets.at("lib/bootstrap/css/bootstrap.min.css")'>
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
-    <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
-    <script type='text/javascript' src='@routes.Assets.at("lib/jquery/jquery.min.js")'></script>
-    <script type='text/javascript' src='@routes.Assets.at("lib/flot/jquery.flot.js")'></script>
-    <script type='text/javascript' src='@routes.Assets.at("javascripts/index.js")'></script>
+    <link rel='stylesheet' href='assets/lib/bootstrap/css/bootstrap.min.css'>
+    <link rel="stylesheet" media="screen" href="assets/stylesheets/main.css">
+    <link rel="shortcut icon" type="image/png" href="assets/images/favicon.png">
+    <script type='text/javascript' src='assets/lib/jquery/jquery.min.js'></script>
+    <script type='text/javascript' src='assets/lib/flot/jquery.flot.js'></script>
+    <script type='text/javascript' src='assets/javascripts/index.js'></script>
+    <script type="text/javascript">
+        window.onload = function(){
+            body = document.getElementsByTagName('body')[0];
+            body.setAttribute('data-ws-url','wss://' + location.host + location.pathname + 'ws')
+        };
+    </script>
 </head>
-<body data-ws-url="@routes.Application.ws.webSocketURL(request)">
+<body data-ws-url="">
     <div class="navbar navbar-inverse navbar-fixed-top">
         <div class="navbar-inner">
             <div class="container">
