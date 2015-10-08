@@ -16,7 +16,8 @@ libraryDependencies ++= Seq(
   "org.easytesting" % "fest-assert" % "1.4" % Test,
   "com.typesafe.akka" %% "akka-testkit" % "2.3.11" % Test,
   "org.webjars" % "bootstrap" % "2.3.2",
-  "org.webjars" % "flot" % "0.8.0"
+  "org.webjars" % "flot" % "0.8.0",
+  "org.scalaj" %% "scalaj-http" % "1.1.5"
 )
 
 routesGenerator := InjectedRoutesGenerator
