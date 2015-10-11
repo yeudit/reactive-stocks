@@ -8,6 +8,13 @@ import scala.collection.JavaConverters._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import play.libs.Akka
+import sys.process._
+import java.net.URL
+import java.io.File
+import java.util.{Date, Locale}
+import java.util.Calendar
+import java.text.DateFormat
+import java.text.DateFormat._
 
 /**
  * There is one StockActor per stock symbol.  The StockActor maintains a list of users watching the stock and the stock
@@ -18,24 +25,49 @@ class StockActor(symbol: String) extends Actor {
 
   lazy val stockQuote: StockQuote = new FakeStockQuote
   
-  protected[this] var watchers: HashSet[ActorRef] = HashSet.empty[ActorRef]
+  protected[this] var watchers: HashSet[ActorRef] = HashSet.empty[ActorRef] 
+    val fromDate = Calendar.getInstance()
+    fromDate.add(Calendar.MONTH, -2);
+    val financeFromMonth = fromDate.get(Calendar.MONTH)
+    val financeFromDay = fromDate.get(Calendar.DAY_OF_MONTH)
+    val financeFromYear = fromDate.get(Calendar.YEAR)
 
-  // A random data set which uses stockQuote.newPrice to get each data point
-  var stockHistory: Queue[java.lang.Double] = {
-    lazy val initialPrices: Stream[java.lang.Double] = (new Random().nextDouble * 800) #:: initialPrices.map(previous => stockQuote.newPrice(previous))
-    initialPrices.take(50).to[Queue]
-  }
-  
+    val toDate = Calendar.getInstance()
+    toDate.add(Calendar.DATE, -1);
+    val financeToMonth = toDate.get(Calendar.MONTH)
+    val financeToDay = toDate.get(Calendar.DAY_OF_MONTH)
+    val financeToYear = toDate.get(Calendar.YEAR)
+    
+    val financeSymbol = symbol
+    
+    val filePath = s"/tmp/${financeSymbol}.csv"
+    new URL(s"http://ichart.finance.yahoo.com/table.csv?s=${financeSymbol}&a=${financeFromMonth}&b=${financeFromDay}&c=${financeFromYear}&d=${financeToMonth}&e=${financeToDay}&f=${financeToYear}&g=d&ignore=.csv") #> new File(filePath) !!
+
+    val bufferedSource = io.Source.fromFile(filePath)
+    bufferedSource.getLines.drop(1) // delete names of columns
+    var records = bufferedSource.getLines.toArray.reverse
+    var index = 1
+    var fields = records(0).split(",").map(_.trim)
+    // A random data set which uses stockQuote.newPrice to get each data point
+    var stockHistory: Queue[java.lang.Double] = {
+      lazy val initialPrices: Stream[java.lang.Double] = fields(4).toDouble.asInstanceOf[java.lang.Double] #:: initialPrices.map(previous => {
+        fields = records(index).split(",").map(_.trim)
+        index += 1
+        fields(4).toDouble.asInstanceOf[java.lang.Double]
+      })
+      initialPrices.take(records.length).to[Queue]
+    }
+
   // Fetch the latest stock value every 75ms
-  val stockTick = context.system.scheduler.schedule(Duration.Zero, 75.millis, self, FetchLatest)
+  //val stockTick = context.system.scheduler.schedule(Duration.Zero, 75.millis, self, FetchLatest)
 
   def receive = {
     case FetchLatest =>
       // add a new stock price to the history and drop the oldest
-      val newPrice = stockQuote.newPrice(stockHistory.last.doubleValue())
-      stockHistory = stockHistory.drop(1) :+ newPrice
-      // notify watchers
-      watchers.foreach(_ ! StockUpdate(symbol, newPrice))
+      // val newPrice = stockQuote.newPrice(stockHistory.last.doubleValue())
+      // stockHistory = stockHistory.drop(1) :+ newPrice
+      // // notify watchers
+      // watchers.foreach(_ ! StockUpdate(symbol, newPrice))
     case WatchStock(_) =>
       // send the stock history to the user
       sender ! StockHistory(symbol, stockHistory.asJava)
@@ -44,7 +76,7 @@ class StockActor(symbol: String) extends Actor {
     case UnwatchStock(_) =>
       watchers = watchers - sender
       if (watchers.size == 0) {
-        stockTick.cancel()
+        // stockTick.cancel()
         context.stop(self)
       }
   }
