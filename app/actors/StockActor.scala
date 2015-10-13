@@ -27,7 +27,7 @@ class StockActor(symbol: String) extends Actor {
   
   protected[this] var watchers: HashSet[ActorRef] = HashSet.empty[ActorRef] 
     val fromDate = Calendar.getInstance()
-    fromDate.add(Calendar.MONTH, -2);
+    fromDate.add(Calendar.DATE, -62);
     val financeFromMonth = fromDate.get(Calendar.MONTH)
     val financeFromDay = fromDate.get(Calendar.DAY_OF_MONTH)
     val financeFromYear = fromDate.get(Calendar.YEAR)
