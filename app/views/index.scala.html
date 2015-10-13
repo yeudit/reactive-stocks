@@ -10,11 +10,13 @@
     <link rel="shortcut icon" type="image/png" href="assets/images/favicon.png">
     <script type='text/javascript' src='assets/lib/jquery/jquery.min.js'></script>
     <script type='text/javascript' src='assets/lib/flot/jquery.flot.js'></script>
+    <script type="text/javascript" src="assets/lib/flot/jquery.flot.time.js"></script>
+    <script type="text/javascript" src="assets/lib/flot/jquery.flot.axislabels.js"></script>
     <script type='text/javascript' src='assets/javascripts/index.js'></script>
     <script type="text/javascript">
         window.onload = function(){
             body = document.getElementsByTagName('body')[0];
-            body.setAttribute('data-ws-url','ws://' + location.host + location.pathname + 'ws')
+            body.setAttribute('data-ws-url','wss://' + location.host + location.pathname + 'ws')
         };
     </script>
 </head>

@@ -42,21 +42,38 @@ class StockActor(symbol: String) extends Actor {
     
     val filePath = s"/tmp/${financeSymbol}.csv"
     new URL(s"http://ichart.finance.yahoo.com/table.csv?s=${financeSymbol}&a=${financeFromMonth}&b=${financeFromDay}&c=${financeFromYear}&d=${financeToMonth}&e=${financeToDay}&f=${financeToYear}&g=d&ignore=.csv") #> new File(filePath) !!
-
-    val bufferedSource = io.Source.fromFile(filePath)
-    bufferedSource.getLines.drop(1) // delete names of columns
-    var records = bufferedSource.getLines.toArray.reverse
-    var index = 1
-    var fields = records(0).split(",").map(_.trim)
-    // A random data set which uses stockQuote.newPrice to get each data point
-    var stockHistory: Queue[java.lang.Double] = {
-      lazy val initialPrices: Stream[java.lang.Double] = fields(4).toDouble.asInstanceOf[java.lang.Double] #:: initialPrices.map(previous => {
-        fields = records(index).split(",").map(_.trim)
-        index += 1
-        fields(4).toDouble.asInstanceOf[java.lang.Double]
-      })
-      initialPrices.take(records.length).to[Queue]
-    }
+    val fileExists = new java.io.File(s"/tmp/${financeSymbol}.csv").exists   
+    // if(fileExists == true){
+      val bufferedSource = io.Source.fromFile(filePath)
+      bufferedSource.getLines.drop(1) // delete names of columns
+      var records = bufferedSource.getLines.toArray.reverse
+      var index = 1
+      var fields = records(0).split(",").map(_.trim)
+      // A random data set which uses stockQuote.newPrice to get each data point
+      var stockHistory: Queue[java.lang.Double] = {
+        lazy val initialPrices: Stream[java.lang.Double] = fields(4).toDouble.asInstanceOf[java.lang.Double] #:: initialPrices.map(previous => {
+          fields = records(index).split(",").map(_.trim)
+          index += 1
+          fields(4).toDouble.asInstanceOf[java.lang.Double]
+        })
+        initialPrices.take(records.length).to[Queue]
+      }
+      index = 1
+      fields = records(0).split(",").map(_.trim)
+      var stockHistoryDate: Queue[java.lang.String] = {
+        lazy val initialDates: Stream[java.lang.String] = fields(0).toString.asInstanceOf[java.lang.String] #:: initialDates.map(previous => {
+          fields = records(index).split(",").map(_.trim)
+          index += 1
+          fields(0).toString.asInstanceOf[java.lang.String]
+        })
+        initialDates.take(records.length).to[Queue]
+      }
+    // } else {
+    //     var stockHistory: Queue[java.lang.Double] = {
+    //       lazy val initialPrices: Stream[java.lang.Double] = 0.0.toDouble.asInstanceOf[java.lang.Double] #:: initialPrices.map(previous => 0.0.toDouble.asInstanceOf[java.lang.Double])
+    //     initialPrices.take(50).to[Queue]
+    //   }
+    // }
 
   // Fetch the latest stock value every 75ms
   //val stockTick = context.system.scheduler.schedule(Duration.Zero, 75.millis, self, FetchLatest)
@@ -70,7 +87,7 @@ class StockActor(symbol: String) extends Actor {
       // watchers.foreach(_ ! StockUpdate(symbol, newPrice))
     case WatchStock(_) =>
       // send the stock history to the user
-      sender ! StockHistory(symbol, stockHistory.asJava)
+      sender ! StockHistory(symbol, stockHistory.asJava, stockHistoryDate.asJava)
       // add the watcher to the list
       watchers = watchers + sender
     case UnwatchStock(_) =>
@@ -107,7 +124,7 @@ case object FetchLatest
 
 case class StockUpdate(symbol: String, price: Number)
 
-case class StockHistory(symbol: String, history: java.util.List[java.lang.Double])
+case class StockHistory(symbol: String, history: java.util.List[java.lang.Double], dates:java.util.List[java.lang.String])
 
 case class WatchStock(symbol: String)
 

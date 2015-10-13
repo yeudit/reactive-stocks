@@ -52,6 +52,11 @@ public class UserActor extends UntypedActor {
             for (Object price : stockHistory.history()) {
                 historyJson.add(((Number)price).doubleValue());
             }
+
+            ArrayNode historyDateJson = stockUpdateMessage.putArray("historyDates");
+            for (Object date : stockHistory.dates()) {
+                historyDateJson.add(((String)date).toString());
+            }
             
             out.write(stockUpdateMessage);
         }

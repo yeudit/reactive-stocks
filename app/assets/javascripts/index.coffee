@@ -1,5 +1,5 @@
 $ ->
-  wsUrl = 'ws://' + location.host + location.pathname + 'ws';
+  wsUrl = 'wss://' + location.host + location.pathname + 'ws';
   ws = new WebSocket wsUrl
   ws.onmessage = (event) ->
     message = JSON.parse event.data
@@ -23,6 +23,17 @@ getPricesFromArray = (data) ->
 
 getChartArray = (data) ->
   ([i, v] for v, i in data)
+
+getDate = (date) ->
+  new Date(date).getTime()
+
+getChartHistoryArray = (history, dates) ->
+  points = []
+  i = 0
+  while i < history.length
+    points[i] = [getDate(dates[i]),history[i]]
+    i++
+  points
 
 getChartOptions = (data) ->
   series:
@@ -48,7 +59,7 @@ populateStockHistory = (message) ->
   flipContainer = $("<div>").addClass("flip-container").append(flipper).click (event) ->
     handleFlip($(this))
   $("#stocks").prepend(flipContainer)
-  plot = chart.plot([getChartArray(message.history)], getChartOptions(message.history)).data("plot")
+  plot = chart.plot([getChartHistoryArray(message.history,message.historyDates)], getChartOptions(message.history)).data("plot")
 
 updateStockChart = (message) ->
   if ($("#" + message.symbol).size() > 0)
